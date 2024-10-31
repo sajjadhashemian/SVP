@@ -1,3 +1,15 @@
-# Polynomial Space Exponential Time SVP Algorithm
-To do:
-- Calculate the required sample size for regression analysis.
+## Polynomial Space Exponential Time SVP Algorithm
+
+**Overview**
+
+This repository implements a polynomial space, exponential time algorithm for the Shortest Vector Problem in Euclidean lattices. The algorithm samples vectors from 1-dimensional Gaussian joints with uniform distribution on the $n$-dimensional unit sphere ($\sim e^{-\frac{\|x\|^2 - R^2}{\sigma}}$). By subtracting the modulo vector, the algorithm generates lattice vectors as potential SVP solutions.
+
+<!--- **Usage**
+Provide instructions on how to use the code, including any necessary dependencies and configuration options. --->
+
+**TO DO**
+
+- Determine the optimal sample size required for accurate regression analysis to assess the algorithm's performance and efficiency. 
+- Use discrete sampling to improve the sampling process and reduce computational overhead.
+- Rigorous analysis of the algorithm's error bounds and convergence properties.
+- **(DONE)** *Parallel Implementation.*
