@@ -1,12 +1,10 @@
 import numpy as np
 from numpy.linalg import norm, inv, pinv
-# from fpylll import FPLLL, IntegerMatrix, SVP, LLL, BKZ
-# from fpylll.algorithms.bkz import BKZReduction
 from scipy.special import gammainc, gammaincinv, gammainccinv
 from copy import copy
 import math
-# from multiprocessing import Pool, cpu_count
-# from svp import __svp as __svp__
+from multiprocessing import Pool, cpu_count
+
 
 np.random.seed(1337)
 
@@ -55,3 +53,33 @@ def __svp(B, n, R, sigma, num_samples):
 			l=norm(x)
 			s=copy(x)
 	return s,l
+
+def __fast_svp(B, n, R, sigma, num_samples, processes=None):
+    if processes is None:
+        processes = cpu_count()
+    # print(f'computing with {processes} processes.')
+    args = [(B, n, R, sigma, num_samples//processes) for _ in range(processes)]
+    with Pool(processes) as pool:
+        results = pool.starmap(__svp, args)
+    best_s, best_l = min(results, key=lambda x: x[1])
+
+    return best_s, best_l
+
+def __search_svp(B, n, t):
+	l, r = 0, min(norm(x) for x in B)
+	s, L = -1, r
+	# print(l,r)
+	for _ in range(10):
+		m=(l+r)/2
+		# print(_, int(m), int(L), '->', int(l), int(r))
+		_s, _L=__fast_svp(B, n, m, m, t)
+		if(_L<L):
+			s, L=_s, _L
+		else:
+			_s, _L = s, L
+		r=_L
+		if(_L>m):
+			l=m
+		else:
+			l=m/2
+	return s,L
