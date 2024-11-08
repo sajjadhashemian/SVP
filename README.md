@@ -10,6 +10,9 @@ Provide instructions on how to use the code, including any necessary dependencie
 **TO DO**
 
 - Determine the optimal sample size required for accurate regression analysis to assess the algorithm's performance and efficiency. 
-- Use discrete sampling to improve the sampling process and reduce computational overhead.
-- Rigorous analysis of the algorithm's error bounds and convergence properties.
-- **(DONE)** *Parallel Implementation.*
+- (Maybe) Use discrete sampling to improve the sampling process and reduce computational overhead.
+- **(50%)** Rigorous analysis of the algorithm's error bounds.
+- GPU Implementation (CuPy).
+- Experimenting on Higher Dimensional Lattices.
+- **(DONE)** *Multi Process Implementation.*
+- **(DONE)** *Preliminary Test.*
