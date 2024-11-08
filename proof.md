@@ -22,7 +22,7 @@ where $ Z = \int_V f(x) \, dx $, and $ \mathcal{P}(B) + s $ is the parallelepipe
 
 Since computing the value of $Z$ is challenging, we overcome this issue by computing the probability $P(x\in \mathcal{P}(B)+s\mid \|x\|\in[aR,bR])$, where $a\in[0,1]$ and $b>1$. Thus, if we choose $a$ and $b$ appropriately such that for every $x\in\mathcal{P}(B)+s$, we have $\|x\|\in[aR,bR]$, we can be sure that:
 $$
-P(x\in \mathcal{P}(B)+s\mid \|x\|\in[aR,bR])=\frac{\int_{\mathcal{P}(B)+s}f(x)dx}{\int_{\|x\|\in[aR,bR]}f(x)dx}
+P(x\in \mathcal{P}(B)+s)=\frac{P(x\in \mathcal{P}(B)+s\mid \|x\|\in[aR,bR])}{P(\|x\|\in[aR,bR])}=\frac{\int_{\mathcal{P}(B)+s}f(x)dx}{\int_{\|x\|\in[aR,bR]}f(x)dx}
 $$
 ------
 
