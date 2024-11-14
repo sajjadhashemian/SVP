@@ -10,7 +10,7 @@ np.random.seed(1337)
 
 @njit(parallel=True, fastmath=True, cache=True)
 def __decision_svp(B, n, R, sigma, C):
-    num_samples = (2**(C*n))*int(math.log2(n))
+    num_samples = (2**(C*n))*int(math.log(n))
     np.random.seed(1337+np.random.randint(1,10))
     s = np.zeros(n, dtype=np.float64)
     l = 2 ** norm(B)
