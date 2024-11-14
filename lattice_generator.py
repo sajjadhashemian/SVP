@@ -1,9 +1,5 @@
 import numpy as np
-from numpy.linalg import norm, inv, pinv
-from fpylll import FPLLL, IntegerMatrix, SVP, LLL, BKZ, CVP
-from fpylll.algorithms.bkz import BKZReduction
-from copy import copy
-import math
+from fpylll import FPLLL, IntegerMatrix, LLL
 np.random.seed(1337)
 FPLLL.set_random_seed(1337)
 
