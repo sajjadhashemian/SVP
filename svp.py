@@ -3,7 +3,6 @@ import numpy as np
 from numba import njit, prange
 from numpy.linalg import norm, inv, pinv
 import math
-
 np.random.seed(1337)
 
 
@@ -15,9 +14,7 @@ def __decision_svp(B, n, R, sigma, C):
 	s = np.zeros(n, dtype=np.float64)
 	l = 2 ** norm(B)
 	B_pinv = pinv(B)
-	counter = 0
-	while(counter<num_samples):
-		counter+=1
+	for counter in range(num_samples):
 		r = np.random.normal(R, sigma)
 		direction = np.random.normal(0,1,n)
 		v = r * direction
@@ -29,11 +26,10 @@ def __decision_svp(B, n, R, sigma, C):
 		if(l<=R+1e-5):
 			c = (math.log(counter)/math.log(2))/n
 			return s, l, c
-		C=max(counter,-1)
 	return s, l, -C
 
 
-def decision_svp(B, n, R, C=1):
+def decision_svp(B, n, R, C=0.5):
 	return __decision_svp(B.astype(float), n, R, R, C)
 
 
