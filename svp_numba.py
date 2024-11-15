@@ -14,7 +14,7 @@ from lattice_generator import generate_random_instance, generate_hard_instance, 
 np.random.seed(1337)
 FPLLL.set_random_seed(1337)
 
-n, b = 58, 32
+n, b = 59, 32
 X = generate_random_instance(b, n)
 
 # n, p, r= 17, 97, 3
