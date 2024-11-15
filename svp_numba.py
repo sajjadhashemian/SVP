@@ -14,7 +14,7 @@ from lattice_generator import generate_random_instance, generate_hard_instance, 
 np.random.seed(1337)
 FPLLL.set_random_seed(1337)
 
-n, b= 84, 32
+n, b = 84, 32
 X = generate_random_instance(b, n)
 
 # n, p, r= 17, 97, 3
@@ -34,15 +34,16 @@ print('------------------------------------')
 print('my solution:')
 C = 0.5														#Exponent constant: number of samples, Working fine, but C~20: 2*e*pi
 t1=time.time()
-s, _l, c = decision_svp(B, n, l, C)
+s, _l, c = decision_svp(B, n, l)
 t2=time.time()
 
 # print([-int(x) for x in s],'\n Norm:', _l)
 print('Norm:', _l)
 
 t=int(t2-t1)
+ms=int(((t2-t1)-t)*1e3)
 print('exponent constant: ', c)
-print('elapsed time: ',t//60, 'm', t%60, 's')
+print('elapsed time: ',t//60, 'm', t%60, 's', ms, 'ms')
 
 print('------------------------------------')
 print('verify solution:')
