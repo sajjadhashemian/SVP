@@ -8,29 +8,40 @@ np.random.seed(1337)
 
 
 @njit(parallel=True, fastmath=True, cache=False)
-def __decision_svp(B, n, R, sigma, C):
-	num_samples = (2**(C*n))*int(math.log(n))
-	np.random.seed(1337+np.random.randint(1,11111))
+def __decision_svp(B, n, R, sigma, num_batch, batch_size):
+	np.random.seed(1337+np.random.randint(1,1337))
 	s = np.zeros(n, dtype=np.float64)
 	l = 2 ** norm(B)
 	B_pinv = pinv(B)
-	for counter in range(num_samples):
-		r = np.random.normal(R, sigma)
-		direction = np.random.normal(0,1,n)
-		v = r * direction
-		x = B @ np.round(B_pinv @ v)
-		x_norm = norm(x)
-		if(x_norm>1e-5 and x_norm<l):
-			l = x_norm
-			s = x
-		if(l<=R+1e-5):
-			c = (math.log(counter)/math.log(2))/n
-			return s, l, c
-	return s, l, -C
+	for batch in range(num_batch):
+		# print('-----',batch, num_batch)
+		np.random.seed(1337+np.random.randint(1,1337))
+		for counter in range(batch_size):
+			# if(counter%2**20==0):
+			# 	print(counter)
+			r = np.random.normal(R, sigma)
+			direction = np.random.normal(0,1,n)
+			v = r * direction
+			x = B @ np.round(B_pinv @ v)
+			x_norm = norm(x)
+			if(x_norm>1e-5 and x_norm<l):
+				l = x_norm
+				s = x
+			if(l<=R+1e-5):
+				return s, l, counter, batch
+	return s, l, -1, -1
 
 
 def decision_svp(B, n, R, C=0.5):
-	return __decision_svp(B.astype(float), n, R, R, C)
+	num_samples = (2**(C*n))*int(math.log(n))
+	batch_size=2**30
+	num_batch=int((num_samples+batch_size)/batch_size) 
+	s, l, c, t = __decision_svp(B.astype(float), int(n), float(R), float(R), int(num_batch), int(batch_size))
+	if(t==-1):
+		return s, l, -C
+	else:
+		x = math.log2(t*batch_size+c)/n
+		return s, l, x
 
 
 def __search_svp(B, n):

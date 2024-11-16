@@ -1,5 +1,5 @@
 import numpy as np
-from fpylll import FPLLL, IntegerMatrix, LLL
+from fpylll import FPLLL, IntegerMatrix, LLL, BKZ
 np.random.seed(1337)
 FPLLL.set_random_seed(1337)
 
@@ -47,7 +47,7 @@ def reduced_basis(X, n):
 	A = IntegerMatrix.from_matrix(B)
 
 	barA=LLL.reduction(A)
-	# A = BKZ.reduction(A, BKZ.Param(20))
+	# barA = BKZ.reduction(A, BKZ.Param(20))
 	
 	B=list([])
 	for i in range(n):
