@@ -3,7 +3,7 @@ from numpy.linalg import norm
 from fpylll import FPLLL, SVP, CVP
 from copy import copy
 import math
-from svp import __fast_svp
+from svp import __decision_svp
 from lattice_generator import generate_random_instance, generate_hard_instance, reduced_basis
 
 np.random.seed(1337)
@@ -19,7 +19,7 @@ def solve_svp(X, n, C):
 
 	# C = 1	#Working fine, but C~20: 2*e*pi
 	num_samples=int(2**(C*n))*int(math.log2(n))
-	s, _l = __fast_svp(B, n, l, l, num_samples)
+	s, _l = __decision_svp(B, n, l, l, num_samples)
 
 	v0 = CVP.closest_vector(X, tuple([int(x) for x in s]))
 	verdict=bool(abs(norm(v0)-_l)<1e-3)

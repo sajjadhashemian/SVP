@@ -1,0 +1,8 @@
+numpy
+setuptools
+Cython>=3.0
+pytest
+cysignals
+black
+fpylll
+numba
