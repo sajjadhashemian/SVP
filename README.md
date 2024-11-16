@@ -9,11 +9,11 @@ Provide instructions on how to use the code, including any necessary dependencie
 
 **TO DO**
 
-- **(50%)** Determine the optimal sample size required using regression.
-- ~~(Maybe) Use discrete sampling to improve the sampling process and reduce overhead.~~
+- CuPy Implementation.
 - **(50%)** Rigorous analysis of the algorithm's error bounds.
-- GPU Implementation (CuPy).
-- **(50%)** Experimenting on Higher Dimensional Lattices.
-- **(DONE)** Parallel Implementation (CuPy).
+- **(50%)** Determine the optimal sample size required using regression.
+- **(50%)** Experimenting on Higher Dimensional Hard Lattices.
+- **(75%)** Parallel Implementation.
 - **(DONE)** *Multi Process Implementation.*
 - **(DONE)** *Preliminary Test.*
+- ~~(Maybe) Use discrete sampling to improve the sampling process and reduce overhead.~~
