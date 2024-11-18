@@ -3,6 +3,7 @@ from fpylll import FPLLL, IntegerMatrix, LLL, BKZ
 np.random.seed(1337)
 FPLLL.set_random_seed(1337)
 
+
 def generate_random_instance(b, n):
 	A = IntegerMatrix(n,n)
 	A.randomize("uniform", bits=b)
@@ -38,21 +39,35 @@ def generate_hard_instance(n, q, r):
 
 	return lattice_basis.astype(int)
 
-def reduced_basis(X, n):
+def reduced_basis(X, n, m):
+	n, m = X.shape
 	B=list([])
 	for i in range(n):
-		B.append([0 for _ in range(n)])
-		for j in range(n):
+		B.append([0 for _ in range(m)])
+		for j in range(m):
 			B[i][j]=int(X[i][j])
 	A = IntegerMatrix.from_matrix(B)
 
-	barA=LLL.reduction(A)
-	# barA = BKZ.reduction(A, BKZ.Param(20))
+	# A=LLL.reduction(A)
+	A = BKZ.reduction(A, BKZ.Param(20))
 	
 	B=list([])
 	for i in range(n):
-		B.append([0 for _ in range(n)])
-		for j in range(n):
-			B[i][j]=int(barA[i][j])
+		B.append([0 for _ in range(m)])
+		for j in range(m):
+			B[i][j]=int(A[i][j])
 	B=np.array(B).T
 	return A, B
+
+
+def generate_challange(m):
+	c1 = 2.1
+	c2 = c1 * np.log(2) - np.log(2) / (50 * np.log(50))
+	n = max(50, int(m / (c1 * np.log(m))))
+	q = int(np.floor(n ** c2))
+	X = np.random.randint(0, q, (n, m))
+	Y = np.block([
+		[X.T, q * np.eye(m, dtype=int)]
+	])
+	n, m = Y.shape
+	return reduced_basis(Y, n, m)

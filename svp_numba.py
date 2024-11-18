@@ -9,19 +9,24 @@ import time
 import math
 
 from svp import decision_svp
-from lattice_generator import generate_random_instance, generate_hard_instance, reduced_basis
+from lattice_generator import generate_random_instance, generate_hard_instance, reduced_basis, generate_challange
 
 np.random.seed(1337)
 FPLLL.set_random_seed(1337)
 
 # 57, 68, 73, 84
-n, b = 84, 18
-X = generate_random_instance(b, n)
+# n, b = 84, 18
+# X = generate_random_instance(b, n)
 
 # n, p, r= 17, 97, 3
 # X = generate_hard_instance(n, p, r)
 
-A, B = reduced_basis(X, n)
+# A, B = reduced_basis(X, n)
+
+n = 90
+A, B = generate_challange(n)
+X=copy(A)
+
 
 SVP.shortest_vector(A)
 s, l = A[0], norm(A[0])
@@ -35,7 +40,7 @@ print('------------------------------------')
 print('my solution:')
 C = 0.5														#Exponent constant: number of samples, Working fine, but C~20: 2*e*pi
 t1=time.time()
-s, _l, c = decision_svp(B, n, l, C)
+s, _l, c = decision_svp(B, l, C)
 t2=time.time()
 
 # print([-int(x) for x in s],'\n Norm:', _l)

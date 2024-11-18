@@ -8,7 +8,8 @@ np.random.seed(1337)
 
 
 @njit(parallel=True, fastmath=True, cache=False)
-def __decision_svp(B, n, R, sigma, num_batch, batch_size):
+def __decision_svp(B, R, sigma, num_batch, batch_size):
+	n, m = B.shape
 	np.random.seed(1337+np.random.randint(1,1337))
 	s = np.zeros(n, dtype=np.float64)
 	l = 2 ** norm(B)
@@ -32,15 +33,16 @@ def __decision_svp(B, n, R, sigma, num_batch, batch_size):
 	return s, l, -1, -1
 
 
-def decision_svp(B, n, R, C=0.5):
-	num_samples = (2**(C*n))*int(math.log(n))
+def decision_svp(B, R, C=0.5):
+	n, m = B.shape
+	num_samples = (2**(C*m))#*int(math.log(m))
 	batch_size=2**30
 	num_batch=int((num_samples+batch_size)/batch_size) 
-	s, l, c, t = __decision_svp(B.astype(float), int(n), float(R), float(R), int(num_batch), int(batch_size))
+	s, l, c, t = __decision_svp(B.astype(float), float(R), float(R), int(num_batch), int(batch_size))
 	if(t==-1):
 		return s, l, -C
 	else:
-		x = math.log2(t*batch_size+c)/n
+		x = math.log2(t*batch_size+c)/m
 		return s, l, x
 
 
@@ -49,7 +51,7 @@ def __search_svp(B, n):
 	s, L = -1, r
 	for _ in range(int(math.log2(n)+1)):
 		m=(l+r)/2
-		_s, _L = __decision_svp(B, n, m)
+		_s, _L = decision_svp(B, m)
 		if(_L<L):
 			s, L = _s, _L
 		else:
