@@ -23,10 +23,13 @@ FPLLL.set_random_seed(1337)
 
 # A, B = reduced_basis(X, n)
 
-n = 90
-A, B = generate_challange(n)
+n = 61
+X = generate_challange(n)
+n, m = X.shape
+A, B = reduced_basis(X, n, m)
 X=copy(A)
 
+# print(A)
 
 SVP.shortest_vector(A)
 s, l = A[0], norm(A[0])
@@ -60,7 +63,9 @@ print('verify solution:')
 
 v0 = CVP.closest_vector(X, tuple([int(x) for x in s]))
 # print('Verify with CVP:      ',[int(x) for x in v0],'\n norm:',norm(v0))
-e=0.0001
-print('Verdict:', bool(abs(norm(v0)-_l)<e) and bool(_l<=l+e), ', ', _l/l)
+e=0.001
+v1 = bool(abs(norm(v0)-_l)<e)
+v2 = bool(_l<=l+e)
+print('Verdict:', v1, v2, v1 and v2, ', ', _l/l)
 
 

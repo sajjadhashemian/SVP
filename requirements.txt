@@ -6,3 +6,4 @@ cysignals
 black
 fpylll
 numba
+hsnf

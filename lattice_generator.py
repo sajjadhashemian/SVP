@@ -1,8 +1,12 @@
 import numpy as np
 from fpylll import FPLLL, IntegerMatrix, LLL, BKZ
-np.random.seed(1337)
-FPLLL.set_random_seed(1337)
+# from hnf import hermite_normal_form
+# from sympy import Matrix
+# from sympy.matrices.normalforms import hermite_normal_form
+from hsnf import row_style_hermite_normal_form as hermite_normal_form
 
+np.random.seed(13371)
+FPLLL.set_random_seed(13317)
 
 def generate_random_instance(b, n):
 	A = IntegerMatrix(n,n)
@@ -59,15 +63,13 @@ def reduced_basis(X, n, m):
 	B=np.array(B).T
 	return A, B
 
-
 def generate_challange(m):
 	c1 = 2.1
 	c2 = c1 * np.log(2) - np.log(2) / (50 * np.log(50))
 	n = max(50, int(m / (c1 * np.log(m))))
 	q = int(np.floor(n ** c2))
 	X = np.random.randint(0, q, (n, m))
-	Y = np.block([
-		[X.T, q * np.eye(m, dtype=int)]
-	])
-	n, m = Y.shape
-	return reduced_basis(Y, n, m)
+	Y = np.block([[X.T, q * np.eye(m, dtype=int)]])
+	H, L = hermite_normal_form(Y.astype(float))  # Compute Hermite Normal Form
+	H = np.array(H).astype(int)
+	return H
