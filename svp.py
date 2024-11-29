@@ -7,7 +7,7 @@ np.random.seed(1337)
 
 
 
-@njit(parallel=True, fastmath=True, cache=False)
+@njit(parallel=True, fastmath=True, cache=True)
 def __decision_svp(B, R, sigma, num_batch, batch_size):
 	n, m = B.shape
 	np.random.seed(1337+np.random.randint(1,1337))

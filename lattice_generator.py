@@ -8,7 +8,9 @@ from hsnf import row_style_hermite_normal_form as hermite_normal_form
 np.random.seed(13371)
 FPLLL.set_random_seed(13317)
 
-def generate_random_instance(b, n):
+def generate_random_instance(b, n, _seed):
+	np.random.seed(_seed)
+	FPLLL.set_random_seed(_seed)
 	A = IntegerMatrix(n,n)
 	A.randomize("uniform", bits=b)
 	# A=[[-1248884424688331397, 217379346648022931, 968695965772720018],
@@ -17,7 +19,8 @@ def generate_random_instance(b, n):
 	# A = IntegerMatrix.from_matrix(A)
 	return A
 
-def generate_hard_instance(n, q, r):
+def generate_hard_instance(n, q, r, _seed):
+	np.random.seed(_seed)
 	"""
 	Generates a hard SVP instance with a short basis using Ajtai99.
     n: Lattice dimension
@@ -44,7 +47,7 @@ def generate_hard_instance(n, q, r):
 	return lattice_basis.astype(int)
 
 def reduced_basis(X, n, m):
-	n, m = X.shape
+	# n, m = X.shape
 	B=list([])
 	for i in range(n):
 		B.append([0 for _ in range(m)])
@@ -63,12 +66,37 @@ def reduced_basis(X, n, m):
 	B=np.array(B).T
 	return A, B
 
-def generate_challange(m):
+
+def generate_matrix_X(n, m, q, _seed):
+	np.random.seed(_seed)
+	log_q = int(np.ceil(np.log2(q)))
+	total_bits = (log_q + 1) + 1
+	X = np.zeros((n, m), dtype=int)
+	random_bits = np.random.randint(0, 2, size=(n * m * total_bits))
+
+	def compute_xij(i, j, l):
+		k = (i - 1) * m + (j - 1) + l * total_bits
+		return sum((2 ** (l_idx - k)) * random_bits[k + l_idx] for l_idx in range(log_q + 1))
+
+	for i in range(1, n + 1):
+		for j in range(1, m + 1):
+			l = 0
+			while True:
+				xij = compute_xij(i, j, l)
+				if xij < q:
+					X[i - 1, j - 1] = xij
+					break
+				l += 1
+	return X
+
+
+def generate_challange(m, _seed):
+	np.random.seed(_seed)
 	c1 = 2.1
 	c2 = c1 * np.log(2) - np.log(2) / (50 * np.log(50))
 	n = max(50, int(m / (c1 * np.log(m))))
 	q = int(np.floor(n ** c2))
-	X = np.random.randint(0, q, (n, m))
+	X = generate_matrix_X(n, m, q, _seed)
 	Y = np.block([[X.T, q * np.eye(m, dtype=int)]])
 	H, L = hermite_normal_form(Y.astype(float))  # Compute Hermite Normal Form
 	H = np.array(H).astype(int)
