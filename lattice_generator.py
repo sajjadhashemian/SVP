@@ -19,11 +19,11 @@ def generate_random_instance(b, n, _seed):
 	# A = IntegerMatrix.from_matrix(A)
 	return A
 
-def generate_knapsack_instance(b, n, _seed):
-	np.random.seed(_seed)
-	FPLLL.set_random_seed(_seed)
-	A = IntegerMatrix.random(n, "intrel", bits=b)
-	return A
+# def generate_knapsack_instance(b, n, _seed):
+# 	np.random.seed(_seed)
+# 	FPLLL.set_random_seed(_seed)
+# 	A = IntegerMatrix.random(n, "intrel", bits=b)
+# 	return A
 
 def generate_hard_instance(n, q, r, _seed):
 	np.random.seed(_seed)
@@ -107,3 +107,12 @@ def generate_challange(m, _seed):
 	H, L = hermite_normal_form(Y.astype(float))  # Compute Hermite Normal Form
 	H = np.array(H).astype(int)
 	return H
+
+
+def generate_knapsack_instance(n, b, _seed):
+	np.random.seed(_seed)
+	X = np.zeros((n, n+1), dtype=int)
+	for i in range(n):
+		X[i, 0] = np.random.randint(0, 2**(b+1))
+		X[i, i + 1] = 1
+	return X

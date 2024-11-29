@@ -33,8 +33,8 @@ def solve_svp(X, n, m, C=0.35, _seed=1337):
 
 
 def test_kanpsack_instance(n, b, _seed):
-	X = generate_knapsack_instance(b, n, _seed)
-	c, t, v1, v2, ratio = solve_svp(X, n, n, _exp_const, _seed)
+	X = generate_knapsack_instance(n, b, _seed)
+	c, t, v1, v2, ratio = solve_svp(X, n, n+1, _exp_const, _seed)
 	verdict = v1 and v2
 	assert verdict==True
 	return c, t, verdict, ratio
@@ -55,7 +55,7 @@ if __name__=='__main__':
 
 	_dict=dict()
 	num_of_test=5
-	low, up = 70, 80
+	low, up = 40, 80
 	b = 18
 	counter=1
 
@@ -63,13 +63,13 @@ if __name__=='__main__':
 		print('-------- test dimension', n)
 		for i in range(num_of_test):
 			print('test number', i)
-			_seed = 1337+np.random.randint(0,n+1337)
-			# c, t, v, r = test_challange(n, _seed)
-			# _dict[counter] = ['Challange', n, c, t, v, r, _seed]
-			# print('Challange')
-			c, t, v, r = test_kanpsack_instance(n, b, _seed)
+			_seed = 1337+np.random.randint(0,n)
+			c, t, v, r = test_challange(n, _seed)
+			_dict[counter] = ['Challange', n, c, t, v, r, _seed]
+			print('Challange', end=', ')
+			c, t, v, r = test_kanpsack_instance(n, int(n/2), _seed)
 			_dict[counter] = ['Knapsack', n, c, t, v, r, _seed]
-			# print('Knapsack')
+			print('Knapsack')
 			counter+=1
 			(pd.DataFrame.from_dict(_dict, orient='index')).to_csv('result.csv')
 

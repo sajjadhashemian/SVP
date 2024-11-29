@@ -5,6 +5,7 @@ from numpy.linalg import norm, inv, pinv
 import math
 # import sys
 np.random.seed(1337)
+# config.THREADING_LAYER = 'omp'  # or 'omp'
 
 
 
@@ -14,12 +15,16 @@ def __decision_svp(B, R, sigma, num_batch, batch_size, _seed):
 	s = np.zeros(n, dtype=np.float64)
 	l = 2 ** norm(B)
 	B_pinv = pinv(B)
-	for batch in range(num_batch):
+	for batch in prange(num_batch):
 		np.random.seed(_seed+np.random.randint(1,_seed))
 		for counter in range(batch_size):
 			r = np.random.normal(R, sigma)
 			direction = np.random.normal(0,1,n)
 			v = r * direction
+			
+			# for i in B_pinv:
+			# 	for x in i:
+
 			x = B @ np.round(B_pinv @ v)
 			x_norm = norm(x)
 			if(x_norm>1e-5 and x_norm<l):
