@@ -19,6 +19,12 @@ def generate_random_instance(b, n, _seed):
 	# A = IntegerMatrix.from_matrix(A)
 	return A
 
+def generate_knapsack_instance(b, n, _seed):
+	np.random.seed(_seed)
+	FPLLL.set_random_seed(_seed)
+	A = IntegerMatrix.random(n, "intrel", bits=b)
+	return A
+
 def generate_hard_instance(n, q, r, _seed):
 	np.random.seed(_seed)
 	"""

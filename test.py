@@ -7,13 +7,13 @@ import math
 import time
 
 from svp import decision_svp
-from lattice_generator import generate_random_instance, generate_hard_instance, reduced_basis, generate_challange
+from lattice_generator import reduced_basis, generate_challange, generate_knapsack_instance
 
-np.random.seed(1337)
-FPLLL.set_random_seed(1337)
+np.random.seed(13371)
+FPLLL.set_random_seed(13317)
+_exp_const=0.35
 
-
-def solve_svp(X, n, m, C=0.5):
+def solve_svp(X, n, m, C=0.35, _seed=1337):
 	A, B = reduced_basis(X, n, m)
 
 	X=copy(A)
@@ -21,7 +21,7 @@ def solve_svp(X, n, m, C=0.5):
 	s, l = A[0], norm(A[0])
 
 	t1=time.time()
-	s, _l, c = decision_svp(B, l, C)
+	s, _l, c = decision_svp(B, l, C, _seed)
 	t2=time.time()
 	t=t2-t1
 
@@ -32,58 +32,46 @@ def solve_svp(X, n, m, C=0.5):
 	return c, t, v1, v2, _l/l
 
 
-def test_random_instance(n, b, _seed):
-	X = generate_random_instance(b, n, _seed)
-	c, t, v1, v2, ratio = solve_svp(X, n, n)
+def test_kanpsack_instance(n, b, _seed):
+	X = generate_knapsack_instance(b, n, _seed)
+	c, t, v1, v2, ratio = solve_svp(X, n, n, _exp_const, _seed)
 	verdict = v1 and v2
 	assert verdict==True
 	return c, t, verdict, ratio
-	
-
-
-def test_hard_instance(n, p, r, _seed):
-	X = generate_hard_instance(n, p, r, _seed)
-	c, t, v1, v2, ratio = solve_svp(X, n, n)
-	verdict = v1 and v2
-	assert verdict==True
-	return c, t, verdict, ratio
-
 
 def test_challange(n, _seed):
 	X = generate_challange(n, _seed)
 	n, m = X.shape
-	c, t, v1, v2, ratio = solve_svp(X, n, m)
+	c, t, v1, v2, ratio = solve_svp(X, n, m, _exp_const, _seed)
 	verdict = v1 and v2
 	assert verdict==True
 	return c, t, verdict, ratio
 
 
 if __name__=='__main__':
-	_dict=dict()
 	for n in range(40, 42):
 		print('Warmup', n)
 		c, t, v, r = test_challange(n, 1337+n)
 
-	low, up = 40, 60
+	_dict=dict()
+	num_of_test=5
+	low, up = 70, 80
 	b = 18
+	counter=1
+
 	for n in range(low, up):
-		print('test_random_instance', n)
-		c, t, v, r = test_random_instance(n, b, 1337+n)
-		_dict[('test_random_instance', n)]= [c, t, v, r]
-		(pd.DataFrame.from_dict(_dict, orient='index')).to_csv('data.csv')
-	
-	p = int(1e9+7)
-	for n in range(low, up):
-		print('test_hard_instance', n)
-		c, t, v, r = test_hard_instance(n, p, int(n/4), 1337+n)
-		_dict[('test_hard_instance', n)]= [c, t, v, r]
-		(pd.DataFrame.from_dict(_dict, orient='index')).to_csv('data.csv')
-	
-	for n in range(low, up):
-		print('test_challange', n)
-		c, t, v, r = test_challange(n, 1337+n)
-		_dict[('test_challange', n)]= [c, t, v, r]
-		(pd.DataFrame.from_dict(_dict, orient='index')).to_csv('data.csv')
+		print('-------- test dimension', n)
+		for i in range(num_of_test):
+			print('test number', i)
+			_seed = 1337+np.random.randint(0,n+1337)
+			# c, t, v, r = test_challange(n, _seed)
+			# _dict[counter] = ['Challange', n, c, t, v, r, _seed]
+			# print('Challange')
+			c, t, v, r = test_kanpsack_instance(n, b, _seed)
+			_dict[counter] = ['Knapsack', n, c, t, v, r, _seed]
+			# print('Knapsack')
+			counter+=1
+			(pd.DataFrame.from_dict(_dict, orient='index')).to_csv('result.csv')
 
 
 	
