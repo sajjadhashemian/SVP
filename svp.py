@@ -26,23 +26,24 @@ def __decision_svp(B, R, sigma, num_batch, batch_size, _seed):
 	# 		for j in range(m):
 	# 			z[i]+=A[i][j]*x[j]
 	#	return z
+	def sample(A, A_, n, R, sigma):
+		r = np.random.normal(R, sigma)
+		direction = np.random.normal(0,1,n)
+		v = r * direction
+		# x = _dot_(B_pinv, v, B_pinv.shape[0], B_pinv.shape[1])
+		# z = _dot_(B, [round(i) for i in x], n, m)
+		z = A @ np.round(A_ @ v)
+		return z
 	for batch in range(num_batch):
 		np.random.seed(_seed+np.random.randint(1,_seed))
 		for counter in range(batch_size):
-			r = np.random.normal(R, sigma)
-			direction = np.random.normal(0,1,n)
-			v = r * direction
-			# x = _dot_(B_pinv, v, B_pinv.shape[0], B_pinv.shape[1])
-			# z = _dot_(B, [round(i) for i in x], n, m)
-			z = B @ np.round(B_pinv @ v)
+			z = sample(B, B_pinv, n, R, sigma)
 			norm_z = norm(z)
 			if(norm_z>1e-5 and norm_z<l):
 				l = norm_z
 				s = z
 				if(l<=R+1e-5):
 					return s, l, counter, batch
-			# if(counter>=43660):
-			# 	print(counter)
 	return s, norm(s), -1, -1
 
 
