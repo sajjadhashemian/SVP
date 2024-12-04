@@ -24,8 +24,10 @@ def solve_svp(X, n, m, C=0.35, _seed=1337):
 	s, _l, c = decision_svp(B, l, C, _seed)
 	t2=time.time()
 	t=t2-t1
-
-	v0 = CVP.closest_vector(X, tuple([int(x) for x in s]))
+	# print(s)
+	# print(norm(s))
+	# print(_l, l)
+	v0 = CVP.closest_vector(X, tuple([round(x) for x in s]))
 	e=0.001
 	v1 = bool(abs(norm(v0)-_l)<e)
 	v2 = bool(_l<=l+e)
@@ -36,6 +38,7 @@ def test_kanpsack_instance(n, b, _seed):
 	X = generate_knapsack_instance(n, b, _seed)
 	c, t, v1, v2, ratio = solve_svp(X, n, n+1, _exp_const, _seed)
 	verdict = v1 and v2
+	# print(v1, v2)
 	assert verdict==True
 	return c, t, verdict, ratio
 
@@ -54,16 +57,16 @@ if __name__=='__main__':
 		c, t, v, r = test_challange(n, 1337+n)
 
 	_dict=dict()
-	num_of_test=5
+	num_of_test=2
 	low, up = 40, 80
-	b = 18
+	b = 32
 	counter=1
 
 	for n in range(low, up):
 		print('-------- test dimension', n)
 		for i in range(num_of_test):
 			print('test number', i)
-			_seed = 1337+np.random.randint(0,n)
+			_seed = 1337+i
 			c, t, v, r = test_challange(n, _seed)
 			_dict[counter] = ['Challange', n, c, t, v, r, _seed]
 			print('Challange', end=', ')

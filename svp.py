@@ -1,38 +1,49 @@
 import numpy as np
 # import cupy as cp
 from numba import njit, prange
-from numpy.linalg import norm, inv, pinv
+from numba.types import float64, int64
+from numpy.linalg import norm, inv, pinv, lstsq
 import math
 # import sys
 np.random.seed(1337)
 # config.THREADING_LAYER = 'omp'  # or 'omp'
 
 
-
-@njit(parallel=True, fastmath=True, cache=True)
+@njit(parallel=True, fastmath=True, cache=True, nogil=True)
 def __decision_svp(B, R, sigma, num_batch, batch_size, _seed):
 	n, m = B.shape
 	s = np.zeros(n, dtype=np.float64)
 	l = 2 ** norm(B)
 	B_pinv = pinv(B)
-	for batch in prange(num_batch):
+	# _B = []
+	# for i in range(n):
+	# 	_B.append([0 for i in range(m)])
+	# 	for j in range(m):
+	# 		_B[i][j]=B[i][j]
+	# def _dot_(A, x, n, m):
+	# 	z = np.zeros(n)
+	# 	for i in range(n):
+	# 		for j in range(m):
+	# 			z[i]+=A[i][j]*x[j]
+	#	return z
+	for batch in range(num_batch):
 		np.random.seed(_seed+np.random.randint(1,_seed))
 		for counter in range(batch_size):
 			r = np.random.normal(R, sigma)
 			direction = np.random.normal(0,1,n)
 			v = r * direction
-			
-			# for i in B_pinv:
-			# 	for x in i:
-
-			x = B @ np.round(B_pinv @ v)
-			x_norm = norm(x)
-			if(x_norm>1e-5 and x_norm<l):
-				l = x_norm
-				s = x
-			if(l<=R+1e-5):
-				return s, l, counter, batch
-	return s, l, -1, -1
+			# x = _dot_(B_pinv, v, B_pinv.shape[0], B_pinv.shape[1])
+			# z = _dot_(B, [round(i) for i in x], n, m)
+			z = B @ np.round(B_pinv @ v)
+			norm_z = norm(z)
+			if(norm_z>1e-5 and norm_z<l):
+				l = norm_z
+				s = z
+				if(l<=R+1e-5):
+					return s, l, counter, batch
+			# if(counter>=43660):
+			# 	print(counter)
+	return s, norm(s), -1, -1
 
 
 def decision_svp(B, R, C=0.5, _seed=1337):
