@@ -11,40 +11,28 @@ np.random.seed(1337)
 
 @njit(parallel=True, fastmath=True, cache=True, nogil=True)
 def __decision_svp(B, R, sigma, num_batch, batch_size, _seed):
-	n, m = B.shape
-	s = np.zeros(n, dtype=np.float64)
-	l = 2 ** norm(B)
-	B_pinv = pinv(B)
-	# _B = []
-	# for i in range(n):
-	# 	_B.append([0 for i in range(m)])
-	# 	for j in range(m):
-	# 		_B[i][j]=B[i][j]
-	# def _dot_(A, x, n, m):
-	# 	z = np.zeros(n)
-	# 	for i in range(n):
-	# 		for j in range(m):
-	# 			z[i]+=A[i][j]*x[j]
-	#	return z
-	def sample(A, A_, n, R, sigma):
+	def sample(A, A_, n, m, n_, m_, R, sigma):
 		r = np.random.normal(R, sigma)
 		direction = np.random.normal(0,1,n)
 		v = r * direction
-		# x = _dot_(B_pinv, v, B_pinv.shape[0], B_pinv.shape[1])
-		# z = _dot_(B, [round(i) for i in x], n, m)
 		z = A @ np.round(A_ @ v)
-		return z
+		return z, norm(z)
+	
+	n, m = B.shape
+	short_vector = np.zeros(n, dtype=np.float64)
+	len_vector = 2 ** norm(B)
+	B_pinv = pinv(B)
+	n_, m_ = B_pinv.shape
 	for batch in range(num_batch):
 		np.random.seed(_seed+np.random.randint(1,_seed))
 		for counter in range(batch_size):
-			z = sample(B, B_pinv, n, R, sigma)
-			norm_z = norm(z)
-			if(norm_z>1e-5 and norm_z<l):
-				l = norm_z
-				s = z
-				if(l<=R+1e-5):
-					return s, l, counter, batch
-	return s, norm(s), -1, -1
+			z, norm_z = sample(B, B_pinv, n, m, n_, m_, R, sigma)
+			if(norm_z>1e-5 and norm_z<len_vector):
+				len_vector = norm_z
+				short_vector = z
+				if(len_vector<=R+1e-5):
+					return short_vector, len_vector, counter, batch
+	return short_vector, len_vector, -1, -1
 
 
 def decision_svp(B, R, C=0.5, _seed=1337):

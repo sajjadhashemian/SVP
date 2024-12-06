@@ -25,7 +25,7 @@ def generate_random_instance(b, n, _seed):
 # 	A = IntegerMatrix.random(n, "intrel", bits=b)
 # 	return A
 
-def generate_hard_instance(n, q, r, _seed):
+def generate_hard_instance(n, q, r, _seed=13317):
 	np.random.seed(_seed)
 	"""
 	Generates a hard SVP instance with a short basis using Ajtai99.
@@ -73,7 +73,7 @@ def reduced_basis(X, n, m):
 	return A, B
 
 
-def generate_matrix_X(n, m, q, _seed):
+def generate_matrix_X(n, m, q, _seed=13317):
 	np.random.seed(_seed)
 	log_q = int(np.ceil(np.log2(q)))
 	total_bits = (log_q + 1) + 1
@@ -96,7 +96,7 @@ def generate_matrix_X(n, m, q, _seed):
 	return X
 
 
-def generate_challange(m, _seed):
+def generate_challange(m, _seed=13317):
 	np.random.seed(_seed)
 	c1 = 2.1
 	c2 = c1 * np.log(2) - np.log(2) / (50 * np.log(50))
@@ -109,7 +109,7 @@ def generate_challange(m, _seed):
 	return H
 
 
-def generate_knapsack_instance(n, b, _seed):
+def generate_knapsack_instance(n, b, _seed=13317):
 	np.random.seed(_seed)
 	X = np.zeros((n, n+1), dtype=int)
 	for i in range(n):
