@@ -44,6 +44,7 @@ def decision_svp__(B, R, C=0.5, _seed=1337):
 	batch_size = [2**20, 2**20, 2**temp0, 2**temp1]
 	t = [int(round(x)) for x in batch_size]
 	s, l, c, verdict = decision_svp.decision_svp(B.astype(float), float(R), float(R), int(2**(C*m)), _seed)
+	l = norm(s)
 	if(verdict==False):
 		return s, l, -C
 	else:

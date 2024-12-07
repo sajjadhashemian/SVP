@@ -71,7 +71,7 @@ if __name__=='__main__':
 		print('-------- test dimension', n)
 		for i in range(num_of_test):
 			print('test number', i)
-			_seed = random.choice(seed_list)
+			_seed = 220614721 #random.choice(seed_list)
 			# c, t, v, r = test_challange(n, _seed)
 			# _dict[2*counter-1] = ['Challange', n, c, t, v, r, _seed]
 			# print('Challange')

@@ -50,11 +50,11 @@ std::tuple<VectorXd, double, long long, bool> decisionSVP(const MatrixXd &B, dou
 	for (long long counter = 0; counter < num_samples; ++counter)
 	{
 		auto [z, norm_z] = sample(B, B_pinv, n, R, sigma);
-		if (norm_z > 1e-5 && norm_z < len_vector)
+		if (norm_z > 1e-5 && norm_z < len_vector + 0.0001)
 		{
 			len_vector = norm_z;
 			short_vector = z;
-			if (len_vector <= R + 1e-5)
+			if (len_vector <= R + 0.1)
 			{
 				return {short_vector, len_vector, counter, true};
 			}
