@@ -1,9 +1,9 @@
 import numpy as np
 # import cupy as cp
-from numba import njit, prange, gdb, gdb_init, gdb_breakpoint
-from numba.types import float64, int64
+from numba import njit, prange
 from numpy.linalg import norm, inv, pinv, lstsq
 import math
+import decision_svp
 # import sys
 np.random.seed(1337)
 # config.THREADING_LAYER = 'omp'  # or 'omp'
@@ -37,19 +37,19 @@ def __decision_svp(B, R, sigma, batch, _seed):
 	return short_vector, len_vector, [0, 0, 0, 0], False
 
 
-def decision_svp(B, R, C=0.5, _seed=1337):
+def decision_svp__(B, R, C=0.5, _seed=1337):
 	n, m = B.shape
 	temp0 = min(20, max(0, C*m-40))
 	temp1 = min(30, max(0, C*m-(40+temp0)))
 	batch_size = [2**20, 2**20, 2**temp0, 2**temp1]
 	t = [int(round(x)) for x in batch_size]
-	s, l, c, verdict = __decision_svp(B.astype(float), float(R), float(R), t, _seed)
+	s, l, c, verdict = decision_svp.decision_svp(B.astype(float), float(R), float(R), int(2**(C*m)), _seed)
 	if(verdict==False):
 		return s, l, -C
 	else:
-		x = c[0]*t[1]*t[2]*t[3] + c[1]*t[2]*t[3] + c[2]*t[3]+ c[3]
-		print(x, c)
-		x = math.log2(x+1)/m
+		# x = c[0]*t[1]*t[2]*t[3] + c[1]*t[2]*t[3] + c[2]*t[3]+ c[3]
+		# print(x, c)
+		x = math.log2(c+1)/m
 		return s, l, x
 
 
