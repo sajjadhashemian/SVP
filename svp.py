@@ -1,6 +1,6 @@
 import numpy as np
 # import cupy as cp
-from numba import njit, prange
+from numba import njit, prange, gdb, gdb_init, gdb_breakpoint
 from numba.types import float64, int64
 from numpy.linalg import norm, inv, pinv, lstsq
 import math
@@ -9,9 +9,9 @@ np.random.seed(1337)
 # config.THREADING_LAYER = 'omp'  # or 'omp'
 
 
-@njit(parallel=True, fastmath=True, cache=True, nogil=True)
-def __decision_svp(B, R, sigma, num_batch, batch_size, _seed):
-	def sample(A, A_, n, m, n_, m_, R, sigma):
+@njit(parallel=True, fastmath=True, cache=True, nogil=True, debug=True)
+def __decision_svp(B, R, sigma, batch, _seed):
+	def sample(A, A_, n, R, sigma):
 		r = np.random.normal(R, sigma)
 		direction = np.random.normal(0,1,n)
 		v = r * direction
@@ -22,30 +22,34 @@ def __decision_svp(B, R, sigma, num_batch, batch_size, _seed):
 	short_vector = np.zeros(n, dtype=np.float64)
 	len_vector = 2 ** norm(B)
 	B_pinv = pinv(B)
-	n_, m_ = B_pinv.shape
-	for batch in range(num_batch):
-		np.random.seed(_seed+np.random.randint(1,_seed))
-		for counter in range(batch_size):
-			z, norm_z = sample(B, B_pinv, n, m, n_, m_, R, sigma)
-			if(norm_z>1e-5 and norm_z<len_vector):
-				len_vector = norm_z
-				short_vector = z
-				if(len_vector<=R+1e-5):
-					return short_vector, len_vector, counter, batch
-	return short_vector, len_vector, -1, -1
+
+	np.random.seed(_seed+np.random.randint(1,_seed))
+	for i1 in range(batch[0]):
+		for i2 in range(batch[1]):
+			for i3 in range(batch[2]):
+				for i4 in range(batch[3]):
+					z, norm_z = sample(B, B_pinv, n, R, sigma)
+					if(norm_z>1e-5 and norm_z<len_vector):
+						len_vector = norm_z
+						short_vector = z
+						if(len_vector<=R+1e-5):
+							return short_vector, len_vector, [i1, i2, i3, i4], True
+	return short_vector, len_vector, [0, 0, 0, 0], False
 
 
 def decision_svp(B, R, C=0.5, _seed=1337):
 	n, m = B.shape
-	num_samples = (2**(C*m))#*int(math.log(m))
-	batch_size=2**30
-	num_batch=int((num_samples+batch_size)//batch_size)
-	s, l, c, t = __decision_svp(B.astype(float), float(R), float(R), int(num_batch), int(batch_size), _seed)
-	if(t==-1):
+	temp0 = min(20, max(0, C*m-40))
+	temp1 = min(30, max(0, C*m-(40+temp0)))
+	batch_size = [2**20, 2**20, 2**temp0, 2**temp1]
+	t = [int(round(x)) for x in batch_size]
+	s, l, c, verdict = __decision_svp(B.astype(float), float(R), float(R), t, _seed)
+	if(verdict==False):
 		return s, l, -C
 	else:
-		# print(t*batch_size+c)
-		x = math.log2(t*batch_size+c+1)/m
+		x = c[0]*t[1]*t[2]*t[3] + c[1]*t[2]*t[3] + c[2]*t[3]+ c[3]
+		print(x, c)
+		x = math.log2(x+1)/m
 		return s, l, x
 
 

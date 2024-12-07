@@ -11,7 +11,7 @@ from lattice_generator import reduced_basis, generate_challange, generate_knapsa
 
 np.random.seed(13371)
 FPLLL.set_random_seed(13371)
-random.seed(13371)
+random.seed(1337)
 _exp_const=0.35
 
 def solve_svp(X, n, m, C=0.35, _seed=1337):
@@ -49,31 +49,33 @@ def test_challange(n, _seed):
 
 
 if __name__=='__main__':
+
 	for n in range(40, 42):
 		print('Warmup', n)
 		c, t, v, r = test_challange(n, 1337+n)
 
 	_dict=dict()
-	num_of_test=1
+	num_of_test=2
 	low, up = 40, 80
-	b = 16
+	b = 62
 	counter=1
-	# seed_list=[1021, 2221, 3121, 4421, 5021, 6221, 7121, 8221, 9721]
-
+	seed_list=[1021, 2221, 3121, 4421, 5021, 6221, 7121, 8221, 9721]
+	COLUMNS = ['Lattice', 'Dimensions', 'Exp Constant', 'Time (s)', 'Verdict', 'Ratio', 'Seed']
+	
 	for n in range(low, up, 2):
 		print('-------- test dimension', n)
 		for i in range(num_of_test):
 			print('test number', i)
-			_seed = 88834601+counter+n
+			_seed = 220614721+counter+n
+
 			c, t, v, r = test_challange(n, _seed)
-			_dict[counter] = ['Challange', n, c, t, v, r, _seed]
-			print('Challange', end=', ')
+			_dict[2*counter-1] = ['Challange', n, c, t, v, r, _seed]
+			print('Challange')
+
 			c, t, v, r = test_kanpsack_instance(n, b, _seed)
-			_dict[counter] = ['Knapsack', n, c, t, v, r, _seed]
+			_dict[2*counter] = ['Knapsack', n, c, t, v, r, _seed]
 			print('Knapsack')
 			counter+=1
-			(pd.DataFrame.from_dict(_dict, orient='index')).to_csv('result.csv')
 
-
-	
-
+			res = pd.DataFrame.from_dict(_dict, orient='index', columns=COLUMNS)
+			res.to_csv('./results/results4.csv')

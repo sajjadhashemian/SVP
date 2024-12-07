@@ -9,10 +9,9 @@ Provide instructions on how to use the code, including any necessary dependencie
 
 **TO DO**
 
-- **(0%)** C++ Implementation.
 - **(50%)** Rigorous analysis of the algorithm's time complexity.
-- **(50%)** Determine the required sample size using regression.
-- **(80%)** Experimenting on Higher Dimensional Hard Lattices.
-- **(DONE)** Parallel Implementation.
+- **(50%)** Determine the required sample size. (0.2)
+- **(Done)** Experimenting on Higher Dimensional Hard Lattices. (80d now!)
+- **(DONE)** Multi Thread Implementation.
 - **(DONE)** *Preliminary Test.*
 - ~~(Maybe) Use discrete sampling to improve the sampling process and reduce overhead.~~
