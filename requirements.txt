@@ -7,3 +7,4 @@ black
 fpylll
 numba
 hsnf
+pandas
