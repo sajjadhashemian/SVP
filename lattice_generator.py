@@ -62,7 +62,7 @@ def reduced_basis(X, n, m):
 	A = IntegerMatrix.from_matrix(B)
 
 	# A=LLL.reduction(A)
-	A = BKZ.reduction(A, BKZ.Param(30))
+	A = BKZ.reduction(A, BKZ.Param(10))
 	
 	B=list([])
 	for i in range(n):

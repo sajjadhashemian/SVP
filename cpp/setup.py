@@ -17,3 +17,5 @@ setup(
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
 )
+
+# python setup.py build_ext --inplace

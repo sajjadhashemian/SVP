@@ -12,7 +12,7 @@ from lattice_generator import reduced_basis, generate_challange, generate_knapsa
 np.random.seed(13371)
 FPLLL.set_random_seed(13371)
 random.seed(1337)
-_exp_const=0.5
+_exp_const=0.35
 
 def solve_svp(X, n, m, C=0.5, _seed=1337):
 	A, B = reduced_basis(X, n, m)

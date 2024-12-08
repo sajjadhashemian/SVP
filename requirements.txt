@@ -8,3 +8,4 @@ fpylll
 numba
 hsnf
 pandas
+pybind11

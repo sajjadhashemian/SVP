@@ -1,7 +1,8 @@
 import numpy as np
-from numba import njit, prange, gdb
+from numba import njit
 from numpy.linalg import norm, pinv
 import math
+from cpp import decision_svp as cpp_svp
 np.random.seed(1337)
 
 
@@ -15,12 +16,12 @@ def __decision_svp(B, R, sigma, sample_size, _seed):
 		return z, norm(z)
 	
 	n, m = B.shape
-	short_vector = np.zeros(n, dtype=np.float64)
-	len_vector = 2 ** norm(B)
 	B_pinv = pinv(B)
 
-	np.random.seed(_seed+np.random.randint(1,_seed))
+	short_vector = np.zeros(n, dtype=np.float64)
+	len_vector = 2 ** norm(B)
 	for counter in range(sample_size):
+		np.random.seed(_seed+np.random.randint(1,_seed))
 		z, norm_z = sample(B, B_pinv, n, R, sigma)
 		if(norm_z>1e-5 and norm_z<len_vector):
 			len_vector = norm_z
@@ -32,10 +33,15 @@ def __decision_svp(B, R, sigma, sample_size, _seed):
 
 def decision_svp(B, R, C=0.5, _seed=1337):
 	n, m = B.shape
-	s, l, c, verdict = __decision_svp(B.astype(float), float(R), float(R), int(2**(C*m)), _seed)
+	sample_size = 2**(C*m)*math.log2(m)
+	x = math.log2(sample_size)/m
+	print(x)
+
+	s, l, c, verdict = cpp_svp.decision_svp(B.astype(float), float(R), float(R/2), int(sample_size), _seed)
+	# s, l, c, verdict = __decision_svp(B.astype(float), float(R), float(R), int(sample_size), _seed)
 	l = norm(s)
 	if(verdict==False):
-		return s, l, -C
+		return s, l, -x
 	else:
 		x = math.log2(c+1)/m
 		return s, l, x
