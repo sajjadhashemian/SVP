@@ -10,7 +10,7 @@ Provide instructions on how to use the code, including any necessary dependencie
 **TO DO**
 
 - **(50%)** Rigorous analysis of the algorithm's time complexity.
-- **(50%)** Determine the required sample size. (0.2)
+- **(50%)** Determine the required sample size. (guess: 2^cn, c>0.5)
 - **(Done)** Experimenting on Higher Dimensional Hard Lattices. (80d now!)
 - **(DONE)** Multi Thread Implementation.
 - **(DONE)** *Preliminary Test.*

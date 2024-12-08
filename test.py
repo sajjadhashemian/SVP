@@ -6,32 +6,30 @@ from copy import copy
 import math
 import time
 import random
-from svp import decision_svp__ as decision_svp
+from svp import decision_svp
 from lattice_generator import reduced_basis, generate_challange, generate_knapsack_instance
 
 np.random.seed(13371)
 FPLLL.set_random_seed(13371)
 random.seed(1337)
-_exp_const=0.35
+_exp_const=0.5
 
-def solve_svp(X, n, m, C=0.35, _seed=1337):
+def solve_svp(X, n, m, C=0.5, _seed=1337):
 	A, B = reduced_basis(X, n, m)
 
 	X=copy(A)
 	SVP.shortest_vector(A)
 	s, l = A[0], norm(A[0])
-	# print(s)
 
 	t1=time.time()
 	s, _l, c = decision_svp(B, l, C, _seed)
-	# print(tuple([int(x) for x in s]))
-
 	t2=time.time()
 	t=t2-t1
+
 	v0 = CVP.closest_vector(X, tuple([round(x) for x in s]))
-	e=0.5
-	v1 = bool(abs(norm(v0)-_l)<e)
-	v2 = bool(_l/l<=1+e)
+	v1 = bool(abs(norm(v0)-_l)<1e-3)
+	# v2 = bool(_l/l<=1+e)
+	v2 = bool(_l<=l+1e-3)
 	return c, t, v1, v2, _l/l, _l, l
 
 
@@ -71,15 +69,17 @@ if __name__=='__main__':
 		print('-------- test dimension', n)
 		for i in range(num_of_test):
 			print('test number', i)
-			_seed = 220614721 #random.choice(seed_list)
+			_seed = 220614721
+
 			# c, t, v, r = test_challange(n, _seed)
-			# _dict[2*counter-1] = ['Challange', n, c, t, v, r, _seed]
+			# _dict[counter] = ['Challange', n, c, t, v, r, _seed]
 			# print('Challange')
+			# counter+=1
 
 			c, t, v, r = test_kanpsack_instance(n, b, _seed)
-			_dict[2*counter] = ['Knapsack', n, c, t, v, r, _seed]
+			_dict[counter] = ['Knapsack', n, c, t, v, r, _seed]
 			print('Knapsack')
-	
 			counter+=1
+
 			res = pd.DataFrame.from_dict(_dict, orient='index', columns=COLUMNS)
-			res.to_csv('./results/results5.csv')
+			res.to_csv('./results/results6.csv')
