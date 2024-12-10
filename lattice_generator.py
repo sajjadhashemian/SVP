@@ -70,6 +70,7 @@ def reduced_basis(X, n, m):
 		for j in range(m):
 			B[i][j]=int(A[i][j])
 	B=np.array(B).T
+	# B=np.array(B)
 	return A, B
 
 

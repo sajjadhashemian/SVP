@@ -1,6 +1,7 @@
 import numpy as np
-from numba import njit
+from numba import njit, prange
 from numpy.linalg import norm, pinv
+from concurrent.futures import ThreadPoolExecutor
 import math
 from cpp import decision_svp as cpp_svp
 np.random.seed(1337)
@@ -31,20 +32,50 @@ def __decision_svp(B, R, sigma, sample_size, _seed):
 	return short_vector, len_vector, 0, False
 
 
-def decision_svp(B, R, C=0.5, _seed=1337):
+def __decision_svp__(B, R, C=0.5, _seed=1337):
 	n, m = B.shape
-	sample_size = 2**(C*m)*math.log2(m)
-	x = math.log2(sample_size)/m
+	sample_size = 2**(C*m)
+	s, l, c, verdict = cpp_svp.decision_svp(B.astype(float), float(R), float(R/2), int(sample_size), _seed)
+	return s, norm(s), c, verdict
+
+
+def multi_thread_decision_svp(B, R, C=0.5, _seed=1337, num_threads=6):
+	n, m = B.shape
+	x = math.log2(num_threads)/m + C
 	print(x)
 
-	s, l, c, verdict = cpp_svp.decision_svp(B.astype(float), float(R), float(R/2), int(sample_size), _seed)
-	# s, l, c, verdict = __decision_svp(B.astype(float), float(R), float(R), int(sample_size), _seed)
-	l = norm(s)
-	if(verdict==False):
-		return s, l, -x
-	else:
-		x = math.log2(c+1)/m
-		return s, l, x
+	chunks_seed = [_seed + np.random.randint(_seed, 2*_seed) for i in range(num_threads)]
+	short_vector, norm_vector, exp_const, verdict = [], [], [], []
+	with ThreadPoolExecutor(max_workers=num_threads) as executor:
+		futures = {executor.submit(__decision_svp__, B, R, C, chunks_seed[i]): i for i in range(num_threads)}
+		for future in futures:
+			try:
+				result = future.result()
+				short_vector.append(result[0])
+				norm_vector.append(result[1])
+				exp_const.append(result[2])
+				verdict.append(result[3])
+				print(f"Thread {futures[future]} is done: {result[3]}, {result[1]}")
+			except Exception as e:
+				print(f"Thread {futures[future]} raised an exception: {e}")
+
+	# all_same = True
+	# for i in range(1, num_threads):
+	# 	s1, s2 = short_vector[i], short_vector[i-1]
+	# 	all_same = all_same and ((s1 == s2).all() or (s1 == -1*s2).all())
+	# print('Are all vectors equal? ', all_same)
+
+	solution_vector = np.zeros(n, dtype=np.float64)
+	solution_norm = 2 ** R
+	for i in range(num_threads):
+		if(verdict[i] == True):
+			x = math.log2(sum(exp_const))/m
+			return short_vector[i], norm_vector[i], x
+		if(solution_norm>norm_vector[i]+1e-3):
+			solution_norm = norm_vector[i]
+			solution_vector = short_vector[i]
+	
+	return solution_vector, solution_norm, -x
 
 
 def __search_svp(B, n):
@@ -52,7 +83,7 @@ def __search_svp(B, n):
 	s, L = -1, r
 	for _ in range(int(math.log2(n)+1)):
 		m=(l+r)/2
-		_s, _L = decision_svp(B, m)
+		_s, _L = multi_thread_decision_svp(B, m)
 		if(_L<L):
 			s, L = _s, _L
 		else:

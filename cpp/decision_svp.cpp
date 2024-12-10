@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
+#include <iostream>
 #include <Eigen/Dense>
 #include <random>
 #include <cmath>
@@ -46,6 +47,7 @@ std::tuple<VectorXd, double, long long, bool> decisionSVP(const MatrixXd &B, dou
 
 	// Seed the random number generator
 	std::srand(seed);
+	// std::cout<<"-----SEED: "<<seed<<std::endl;
 
 	for (long long counter = 0; counter < num_samples; ++counter)
 	{
@@ -54,7 +56,7 @@ std::tuple<VectorXd, double, long long, bool> decisionSVP(const MatrixXd &B, dou
 		{
 			len_vector = norm_z;
 			short_vector = z;
-			if (len_vector <= R + 0.1)
+			if (len_vector <= R + 0.0001)
 			{
 				return {short_vector, len_vector, counter, true};
 			}
