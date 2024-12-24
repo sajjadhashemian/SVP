@@ -112,8 +112,10 @@ def generate_challange(m, _seed=13317):
 
 def generate_knapsack_instance(n, b, _seed=13317):
 	np.random.seed(_seed)
-	X = np.zeros((n, n+1), dtype=int)
-	for i in range(n):
-		X[i, 0] = np.random.randint(0, 2**(b+1))
-		X[i, i + 1] = 1
+	A = IntegerMatrix(n, n+1)
+	A.randomize("intrel", bits=b)
+	# X = np.zeros((n, n+1), dtype=int)
+	# for i in range(n):
+	# 	X[i, 0] = np.random.randint(0, 2**(b+1))
+	# 	X[i, i + 1] = 1
 	return X
