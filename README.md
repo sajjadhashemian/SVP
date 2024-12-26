@@ -10,6 +10,9 @@ Provide instructions on how to use the code, including any necessary dependencie
 **TO DO**
 
 - **(0%)** Rigorous analysis of the algorithm's time complexity.
+- **(0%)** Two stage implementation:
+	- Constructing short basis
+	- Trying on the short basis
 - **(50%)** Determine the required sample size. (guess: 2^cn, c>0.52)
 - **(DONE)** Experimenting on Higher Dimensional Hard Lattices. (80d now!)
 - **(DONE)** Multi Thread Implementation.

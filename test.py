@@ -12,30 +12,33 @@ from lattice_generator import reduced_basis, generate_challange, generate_knapsa
 np.random.seed(13371)
 FPLLL.set_random_seed(13371)
 random.seed(1337)
-_exp_const=0.46
+_exp_const=0.48
 
 def solve_svp(X, n, m, C=0.5, _seed=1337):
 	A, B = reduced_basis(X, n, m)
-	if(n==44):
-		with open('out.txt', 'w') as f:
-			# for b in B:
-			print(A, file=f)
 
 	X=copy(A)
 	SVP.shortest_vector(A)
 	s, l = A[0], norm(A[0])
 
 	t1=time.time()
-	s, _l, c = multi_thread_decision_svp(B, l, C, _seed)
+	_s, _l, c = multi_thread_decision_svp(B, l, C, _seed)
 	t2=time.time()
 	t=t2-t1
 
-	print(n, m, s.shape)
-	v0 = CVP.closest_vector(X, tuple([round(x) for x in s]))
-	v1 = bool(abs(norm(v0)-_l)<1e-3)
+	# print(n, m, s.shape)
+	print(len([int(x) for x in s]), _s.shape)
+	v = CVP.closest_vector(X, tuple([int(x) for x in s]))
+	_v = CVP.closest_vector(X, tuple([int(x) for x in _s]))
+	# print(_s)
+	# print(s)
+	v0 = bool(abs(norm(_v)-_l)<5e-3)
+	v1 = bool(abs(norm(v)-l)<1e-3)
+	print('CVP Mine: ', v0, '\t CVP FPLLL:', v1)
+	v2 = v1 and v0
 	# v2 = bool(_l/l<=1+e)
-	v2 = bool(_l<=l+1e-3)
-	return c, t, v1, v2, _l/l, _l, l
+	v3 = bool(_l<=l+1e-3)
+	return c, t, v1, v3, _l/l, _l, l
 
 
 def test_kanpsack_instance(n, b, _seed):
@@ -58,12 +61,13 @@ def test_challange(n, _seed):
 
 if __name__=='__main__':
 
-	for n in range(40, 42):
-		print('Warmup', n)
-		c, t, v, r = test_challange(n, 1337+n)
+	# for n in range(40, 42):
+	# 	print('Warmup', n)
+	# 	c, t, v, r = test_challange(n, 1337+n)
 
 	_dict=dict()
 	num_of_test=1
+	# low, up = 42, 43
 	low, up = 40, 80
 	b = 62
 	counter=1

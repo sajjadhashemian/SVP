@@ -12,6 +12,7 @@ def __decision_svp(B, R, sigma, sample_size, _seed):
 	def sample(A, A_, n, R, sigma):
 		r = np.random.normal(R, sigma)
 		direction = np.random.normal(0,1,n)
+		direction = direction / norm(direction)
 		v = r * direction
 		z = A @ np.round(A_ @ v)
 		return z, norm(z)
@@ -32,14 +33,15 @@ def __decision_svp(B, R, sigma, sample_size, _seed):
 	return short_vector, len_vector, 0, False
 
 
-def __decision_svp__(B, R, C=0.5, _seed=1337):
+def __decision_svp__(B, mu, sigma, C=0.5, _seed=1337):
 	n, m = B.shape
 	sample_size = 2**(C*m)
-	s, l, c, verdict = cpp_svp.decision_svp(B.astype(float), float(R), float(R/2), int(sample_size), _seed)
-	return s, norm(s), c, verdict
+	s, l, c, verdict = cpp_svp.decision_svp(B.astype(float), float(mu), float(sigma), int(sample_size), _seed)
+	# return s, norm(s), c, verdict
+	return s, c, verdict
 
 
-def multi_thread_decision_svp(B, R, C=0.5, _seed=1337, num_threads=6):
+def multi_thread_decision_svp(B, R, C=0.5, _seed=1337, num_threads=8):
 	n, m = B.shape
 	x = math.log2(num_threads)/m + C
 	print(x)
@@ -47,15 +49,17 @@ def multi_thread_decision_svp(B, R, C=0.5, _seed=1337, num_threads=6):
 	chunks_seed = [_seed + np.random.randint(_seed, 2*_seed) for i in range(num_threads)]
 	short_vector, norm_vector, exp_const, verdict = [], [], [], []
 	with ThreadPoolExecutor(max_workers=num_threads) as executor:
-		futures = {executor.submit(__decision_svp__, B, R, C, chunks_seed[i]): i for i in range(num_threads)}
+		futures = {executor.submit(__decision_svp__, B*10, R*10, R, C, chunks_seed[i]): i for i in range(num_threads)}
 		for future in futures:
 			try:
 				result = future.result()
-				short_vector.append(result[0])
-				norm_vector.append(result[1])
-				exp_const.append(result[2])
-				verdict.append(result[3])
-				print(f"Thread {futures[future]} is done: {result[3]}, {result[1]}")
+				v = result[0]
+				z = B @ v
+				short_vector.append(z)
+				norm_vector.append(norm(z))
+				exp_const.append(result[1])
+				verdict.append(result[2])
+				print(f"Thread {futures[future]} is done: {result[2]}, {norm(z)}")
 			except Exception as e:
 				print(f"Thread {futures[future]} raised an exception: {e}")
 

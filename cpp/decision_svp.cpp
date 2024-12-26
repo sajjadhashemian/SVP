@@ -19,9 +19,13 @@ double normalRandom(double mean, double stddev)
 }
 
 // Function to sample vectors and compute their norms
-std::pair<VectorXd, double> sample(const MatrixXd &B, const MatrixXd &B_pinv, int n, double R, double sigma)
+std::pair<std::pair<VectorXd, double>, VectorXd> sample(const MatrixXd &B, const MatrixXd &B_pinv, double R, double sigma)
 {
 	double r = normalRandom(R, sigma);
+	int n = B_pinv.cols();
+	// std::cout << "Shape B: " << B.rows() << ", " <<B.cols()<< std::endl;
+	// std::cout << "Shape B^-1: " << B_pinv.rows() << ", " << B_pinv.cols() << std::endl;
+
 	VectorXd direction(n);
 	for (int i = 0; i < n; ++i)
 	{
@@ -29,9 +33,16 @@ std::pair<VectorXd, double> sample(const MatrixXd &B, const MatrixXd &B_pinv, in
 	}
 	direction.normalize();
 	VectorXd v = r * direction;
-	VectorXd z = B * ((B_pinv * v).array().round().matrix());
+	// std::cout << "Shape v: " << v.rows() << ", " << v.cols() << std::endl;
+
+	VectorXd v1 = (B_pinv * v).array().round().matrix();
+	// std::cout << "Shape v^-1: " << v1.rows() << ", " << v1.cols() << std::endl;
+
+	VectorXd z = B * v1;
+	// std::cout << "Shape z: " << z.rows() << ", " << z.cols() << std::endl;
+
 	double norm_z = z.norm();
-	return {z, norm_z};
+	return {{z, norm_z}, v1};
 }
 
 // Main function for Decision-SVP
@@ -40,6 +51,7 @@ std::tuple<VectorXd, double, long long, bool> decisionSVP(const MatrixXd &B, dou
 	int n = B.rows();
 	// int m = B.cols();
 	VectorXd short_vector = VectorXd::Zero(n);
+	VectorXd index_vector = VectorXd::Zero(n);
 	double len_vector = std::numeric_limits<double>::infinity();
 
 	// Compute pseudo-inverse of B
@@ -51,18 +63,20 @@ std::tuple<VectorXd, double, long long, bool> decisionSVP(const MatrixXd &B, dou
 
 	for (long long counter = 0; counter < num_samples; ++counter)
 	{
-		auto [z, norm_z] = sample(B, B_pinv, n, R, sigma);
+		auto [Z, v] = sample(B, B_pinv, R, sigma);
+		auto [z, norm_z] = Z;
 		if (norm_z > 1e-5 && norm_z < len_vector + 0.0001)
 		{
 			len_vector = norm_z;
 			short_vector = z;
+			index_vector = v;
 			if (len_vector <= R + 0.0001)
 			{
-				return {short_vector, len_vector, counter, true};
+				return {index_vector, len_vector, counter, true};
 			}
 		}
 	}
-	return {short_vector, len_vector, num_samples, false};
+	return {index_vector, len_vector, num_samples, false};
 }
 
 // Pybind11 bindings
