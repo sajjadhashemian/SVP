@@ -5,7 +5,7 @@ ext_modules = [
     Pybind11Extension(
         "decision_svp",  # Module name
         ["decision_svp.cpp"],  # Source file
-        include_dirs=["/usr/include/eigen3"],  # Path to Eigen headers
+        include_dirs=["/opt/anaconda3/envs/fplll/include/eigen3"],  # Path to Eigen headers
         cxx_std=17,  # C++ standard
     ),
 ]
