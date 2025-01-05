@@ -3,15 +3,15 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 ext_modules = [
     Pybind11Extension(
-        "decision_svp",  # Module name
-        ["decision_svp.cpp"],  # Source file
+        "svp",  # Module name
+        ["svp.cpp"],  # Source file
         include_dirs=["/opt/anaconda3/envs/fplll/include/eigen3"],  # Path to Eigen headers
         cxx_std=17,  # C++ standard
     ),
 ]
 
 setup(
-    name="decision_svp",
+    name="svp",
     version="0.1",
     description="A Pybind11 wrapper for the Decision-SVP problem",
     ext_modules=ext_modules,
