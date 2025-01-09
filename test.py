@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from numpy.linalg import norm
+from numpy.linalg import norm, pinv
 from fpylll import FPLLL, SVP, CVP
 from copy import copy
 import math
@@ -25,11 +25,13 @@ def solve_svp(X, n, m, C=0.5, _seed=1337):
     X = copy(A)
     SVP.shortest_vector(A)
     s, l = A[0], norm(A[0])
+    print([int(x) for x in pinv(B) @ s])
 
     t1 = time.time()
-    _s, _l, c = multi_thread_decision_svp(B, l, C, _seed)
+    _s, _l, c, ind = multi_thread_decision_svp(B, l, C, _seed)
     t2 = time.time()
     t = t2 - t1
+    print([int(x) for x in ind])
 
     # print(n, m, s.shape)
     print(len([int(x) for x in s]), _s.shape)
@@ -43,7 +45,7 @@ def solve_svp(X, n, m, C=0.5, _seed=1337):
     v2 = v1 and v0
     # v2 = bool(_l/l<=1+e)
     v3 = bool(_l <= l + 1e-3)
-    return c, t, v1, v3, _l / l, _l, l
+    return c, t, v3, v2, _l / l, _l, l
 
 
 def test_kanpsack_instance(n, b, _seed):
@@ -52,7 +54,7 @@ def test_kanpsack_instance(n, b, _seed):
     verdict = v1 and v2
     print("v1, v2, ratio, mine, svp, C")
     print(v1, v2, ratio, x, y, c)
-    # assert verdict==True
+    assert verdict == True
     return c, t, verdict, ratio
 
 
@@ -67,13 +69,13 @@ def test_challange(n, _seed):
 
 
 if __name__ == "__main__":
-    for n in range(40, 42):
-        print("Warmup", n)
-        c, t, v, r = test_challange(n, 1337 + n)
+    # for n in range(40, 42):
+    #     print("Warmup", n)
+    #     c, t, v, r = test_challange(n, 1337 + n)
 
     _dict = dict()
     num_of_test = 1
-    # low, up = 42, 43
+    # low, up = 40, 44
     low, up = 40, 80
     b = 62
     counter = 1

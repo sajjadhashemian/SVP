@@ -29,9 +29,14 @@ std::tuple<VectorXd, double, long long, bool> decisionSVP(const MatrixXd &B, dou
 			index_vector = v;
 			if (len_vector <= R + 0.0001)
 			{
+				// for(auto x: v)
+				// 	cout<<x<<", ";cout<<endl;
 				return {index_vector, len_vector, counter, true};
 			}
 		}
 	}
+	// for (auto x : index_vector)
+	// 	cout << x << "; ";
+	// cout << endl;
 	return {index_vector, len_vector, num_samples, false};
 }

@@ -31,24 +31,15 @@ std::pair<VectorXd, VectorXd> sample(const MatrixXd &B, const MatrixXd &B_pinv, 
 {
 	double r = normalRandom(R, sigma);
 	int n = B_pinv.cols();
-	// std::cout << "Shape B: " << B.rows() << ", " <<B.cols()<< std::endl;
-	// std::cout << "Shape B^-1: " << B_pinv.rows() << ", " << B_pinv.cols() << std::endl;
-
 	VectorXd direction(n);
 	for (int i = 0; i < n; ++i)
 	{
 		direction(i) = normalRandom(0, 1);
 	}
-	direction.normalize();
-	VectorXd v = r * direction;
-	// std::cout << "Shape v: " << v.rows() << ", " << v.cols() << std::endl;
-
+	double norm_d = direction.norm();
+	VectorXd v = (r / norm_d) * direction;
 	VectorXd v1 = (B_pinv * v).array().round().matrix();
-	// std::cout << "Shape v^-1: " << v1.rows() << ", " << v1.cols() << std::endl;
-
 	VectorXd z = B * v1;
-	// std::cout << "Shape z: " << z.rows() << ", " << z.cols() << std::endl;
-
 	return {z, v1};
 }
 

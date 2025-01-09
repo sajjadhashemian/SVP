@@ -37,13 +37,13 @@ def __decision_svp(B, R, sigma, sample_size, _seed):
 def __decision_svp__(B, mu, sigma, C=0.5, _seed=1337):
     n, m = B.shape
     sample_size = 2 ** (C * m)
-    _B, c, verdict = cpp_svp.basis_reduction(
-        B.astype(float), float(mu), float(sigma), int(1000), _seed
-    )
-    _B = np.array(_B).astype(float)
+    # _B, c, verdict = cpp_svp.basis_reduction(
+    #     B.astype(float), float(mu), float(sigma), int(1000), _seed
+    # )
+    # _B = np.array(_B).astype(float)
 
-    if verdict:
-        return _B[0], c, verdict
+    # if verdict:
+    #     return _B[0], c, verdict
 
     s, l, c, verdict = cpp_svp.decision_svp(
         B.astype(float), float(mu), float(sigma), int(sample_size), _seed
@@ -61,18 +61,51 @@ def multi_thread_decision_svp(B, R, C=0.5, _seed=1337, num_threads=8):
     chunks_seed = [
         _seed + np.random.randint(_seed, 2 * _seed) for i in range(num_threads)
     ]
-    short_vector, norm_vector, exp_const, verdict = [], [], [], []
+    short_vector, norm_vector, exp_const, verdict, index_vector = [], [], [], [], []
+    # print("============: ", R)
+
+    # def angle(x, y):
+    #     return np.arccos(x @ y / (norm(x) * norm(y)))
+
+    # Angle_B = np.zeros((m, m))
+    # for i in range(m):
+    #     Angle_B[i][i] = 0
+    #     for j in range(m):
+    #         Angle_B[i][j] = angle(B[:, i], B[:, j])
+    #         Angle_B[i][i] = 0
+
+    # def maxx(X, fun, func):
+    #     ret = 2 if fun == "min" else 0
+    #     for i in range(X.shape[0]):
+    #         for j in range(i + 1, X.shape[0]):
+    #             ret = func(X[i][j], ret)
+    #     return ret
+
+    # # print(Angle_B)
+    # print(
+    #     maxx(Angle_B, "min", min) / np.pi,
+    #     maxx(Angle_B, "max", max) / np.pi,
+    #     np.mean(Angle_B / np.pi),
+    # )
+    # print("============")
+
+    # sigma = min(norm(x) for x in B.T)
+
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
         futures = {
-            executor.submit(__decision_svp__, B * 10, R * 10, R, C, chunks_seed[i]): i
+            executor.submit(__decision_svp__, B, R, R, C, chunks_seed[i]): i
             for i in range(num_threads)
         }
         for future in futures:
             try:
                 result = future.result()
                 v = result[0]
+                # for x in v:
+                #     print(x, end=", ")
+                # print()
                 z = B @ v
                 short_vector.append(z)
+                index_vector.append(v)
                 norm_vector.append(norm(z))
                 exp_const.append(result[1])
                 verdict.append(result[2])
@@ -87,16 +120,18 @@ def multi_thread_decision_svp(B, R, C=0.5, _seed=1337, num_threads=8):
     # print('Are all vectors equal? ', all_same)
 
     solution_vector = np.zeros(n, dtype=np.float64)
+    index_solution = np.zeros(n, dtype=np.float64)
     solution_norm = 2**R
     for i in range(num_threads):
         if verdict[i]:
             x = math.log2(sum(exp_const)) / m
-            return short_vector[i], norm_vector[i], x
+            return short_vector[i], norm_vector[i], x, index_vector[i]
         if solution_norm > norm_vector[i] + 1e-3:
             solution_norm = norm_vector[i]
             solution_vector = short_vector[i]
+            index_solution = index_vector[i]
 
-    return solution_vector, solution_norm, -x
+    return solution_vector, solution_norm, -x, index_solution
 
 
 def __search_svp(B, n):
